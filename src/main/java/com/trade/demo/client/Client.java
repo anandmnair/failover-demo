@@ -1,11 +1,14 @@
 package com.trade.demo.client;
 
-import lombok.Builder;
-import lombok.Data;
+import com.societegenerale.failover.domain.Referential;
+import lombok.*;
 
+@EqualsAndHashCode(callSuper = true)
 @Builder
 @Data
-public class Client {
+@NoArgsConstructor
+@AllArgsConstructor
+public class Client extends Referential {
     private Long id;
     private String name;
     private Long score;

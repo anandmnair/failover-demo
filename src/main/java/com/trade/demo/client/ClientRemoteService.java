@@ -16,7 +16,7 @@ public class ClientRemoteService {
 
     private final AtomicBoolean isAvailable = new AtomicBoolean(true);
 
-    @Failover(name = "client-by-id", expiryDuration = 10, expiryUnit = ChronoUnit.MINUTES)
+    @Failover(name = "client-by-id", expiryDuration = 10, expiryUnit = ChronoUnit.MINUTES, domain = "client")
     public Client getClientById(Long id) {
         if (!isAvailable.get()) {
             throw new IllegalStateException("Client not available");
@@ -24,16 +24,26 @@ public class ClientRemoteService {
         return clientRepository.findById(id).orElseThrow(() -> new ClientNotFoundException("Client not found with id: " + id));
     }
 
-    @Failover(name = "client-by-ids", expiryDuration = 10, expiryUnit = ChronoUnit.MINUTES)
-    public List<Client> getClientByIds(String ids) {
+    @Failover(name = "client-by-str-ids", expiryDuration = 10, expiryUnit = ChronoUnit.MINUTES, payloadSplitter = "clientPayloadSplitter", domain = "client")
+    public List<Client> getClientByStringIds(String ids) {
+        if (!isAvailable.get()) {
+            throw new IllegalStateException("Client not available");
+        }
+        return clientRepository.findAllByStringIds(ids);
+    }
+
+    @Failover(name = "client-by-ids", expiryDuration = 10, expiryUnit = ChronoUnit.MINUTES, payloadSplitter = "clientPayloadSplitter", domain = "client")
+    public List<Client> getClientByIds(List<Long> ids) {
         if (!isAvailable.get()) {
             throw new IllegalStateException("Client not available");
         }
         return clientRepository.findAllByIds(ids);
     }
 
+
+
     @Failover(name = "client-all", expiryDuration = 10, expiryUnit = ChronoUnit.MINUTES)
-    public List<Client> getClientByIds() {
+    public List<Client> getAllClients() {
         if (!isAvailable.get()) {
             throw new IllegalStateException("Client not available");
         }

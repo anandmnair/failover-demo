@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
+
 @RestController
 @RequestMapping("/api/v1/clients")
 @RequiredArgsConstructor
@@ -26,11 +28,19 @@ public class ClientController {
         return clientService.getClientById(id);
     }
 
+    @GetMapping("/in/str/{ids}")
+    @Operation(summary = "Get clients by IDs", description = "Comma-separated Long IDs")
+    public ClientsResponse getClientsByStringIds(
+            @Parameter(description = "Comma-separated client IDs") @PathVariable String ids) {
+        return new ClientsResponse(clientService.getClientByStringIds(ids));
+    }
+
     @GetMapping("/in/{ids}")
     @Operation(summary = "Get clients by IDs", description = "Comma-separated Long IDs")
     public ClientsResponse getClientsByIds(
             @Parameter(description = "Comma-separated client IDs") @PathVariable String ids) {
-        return new ClientsResponse(clientService.getClientByIds(ids));
+        var args = Arrays.stream(ids.split(",")).map(Long::valueOf).toList();
+        return new ClientsResponse(clientService.getClientByIds(args));
     }
 
     @GetMapping

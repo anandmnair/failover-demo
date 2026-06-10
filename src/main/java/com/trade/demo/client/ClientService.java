@@ -15,12 +15,16 @@ public class ClientService {
         return clientRemoteService.getClientById(id);
     }
 
-    public List<Client> getClientByIds(String ids) {
+    public List<Client> getClientByIds(List<Long> ids) {
         return clientRemoteService.getClientByIds(ids);
     }
 
+    public List<Client> getClientByStringIds(String ids) {
+        return clientRemoteService.getClientByStringIds(ids);
+    }
+
     public List<Client> getAllClients() {
-        return clientRemoteService.getClientByIds();
+        return clientRemoteService.getAllClients();
     }
 
     public boolean toggleAvailability() {

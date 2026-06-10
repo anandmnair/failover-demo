@@ -26,10 +26,17 @@ public class ClientRepository {
         return store.values().stream().toList();
     }
 
-    public List<Client> findAllByIds(String ids) {
+    public List<Client> findAllByStringIds(String ids) {
         return Arrays.stream(ids.split(","))
                 .map(String::trim)
                 .map(Long::valueOf)
+                .map(store::get)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    public List<Client> findAllByIds(List<Long> ids) {
+        return ids.stream()
                 .map(store::get)
                 .filter(Objects::nonNull)
                 .toList();
