@@ -12,3 +12,16 @@ failover:
     jdbc:
       table-prefix: DEMO_
 
+management:
+  endpoints:
+    web:
+      exposure:
+        # Exposes common metrics and the Prometheus endpoint
+        include: "health, metrics, prometheus"
+  endpoint:
+    health:
+      show-details: always # Shows detailed subsystem health status
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
