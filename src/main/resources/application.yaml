@@ -7,10 +7,51 @@ spring:
 
 failover:
   enabled: true
+  type: basic                        # basic | resilience | custom
+  exception-policy: rethrow          # rethrow | never_throw | custom
+
   store:
-    type: jdbc
+    type: jdbc                       # inmemory | caffeine | jdbc | custom
+    async: true
+    async-executor:                  # back-pressure guard for async writes (default unbounded)
+      concurrency-limit: 0           # 0 = unbounded; >0 caps in-flight writes (still virtual threads)
+      rejection-policy: discard      # discard | caller_runs | abort (only when limit > 0)
     jdbc:
       table-prefix: DEMO_
+      encryption:
+        enabled: false             # encrypt new PAYLOAD writes as ENC(<cipher>:...); reads honour marker regardless
+        cipher: b64                # registered PayloadCipher id; b64 = Base64 encode only (NOT real encryption)
+
+
+  scheduler:
+    enabled: true
+    report-cron: "0 0 0 * * *"       # daily midnight
+    cleanup-cron: "0 0 * * * *"      # every hour
+
+  scatter:
+    parallel: true
+    timeout: 10s                     # per-slice timeout for the parallel path
+    concurrency-limit: 0             # 0 = unbounded; >0 caps slice fan-out (still virtual threads)
+    rejection-policy: discard        # discard | caller_runs | abort (only when limit > 0)
+
+  dashboard:                         # needs failover-dashboard-spring-boot-starter on the classpath
+    enabled: true                    # master switch (secure-by-default) — set true to map anything
+    base-path: /failover-dashboard   # single dedicated namespace for UI + API
+    exposure:                        # defaults expose everything; set flags only to NARROW
+      ui: true
+      api: true
+      include: [config, failover-health, metrics, health]
+    security:
+      role: FAILOVER_ADMIN           # required role for base-path/** when Spring Security is present
+      allow-insecure: true           # if true, start unsecured + loud WARN (dev/trusted-net ONLY)
+      # refused outright when the 'prod' profile is active
+    history:
+      enabled: true                 # server-side ring-buffer sampler + /api/metrics/series
+      samples: 120                   # ring-buffer capacity (retained sample count)
+      sample-interval-seconds: 15
+    health:
+      degraded-threshold: 0.99       # healthy-rate floor for HEALTHY
+      unhealthy-threshold: 0.90      # healthy-rate floor for DEGRADED
 
 management:
   endpoints:

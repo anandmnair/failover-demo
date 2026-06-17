@@ -42,7 +42,7 @@ public class ClientRemoteService {
 
 
 
-    @Failover(name = "client-all", expiryDuration = 10, expiryUnit = ChronoUnit.MINUTES)
+    @Failover(name = "client-all", expiryDuration = 10, expiryUnit = ChronoUnit.MINUTES, payloadSplitter = "clientAllPayloadSplitter", domain = "client")
     public List<Client> getAllClients() {
         if (!isAvailable.get()) {
             throw new IllegalStateException("Client not available");
